@@ -31,7 +31,7 @@ def parse_args():
     parser.add_argument(
         "--eraser-path",
         type=str,
-        default="multilingual_assumptions/results/analysis/eraser.pkl",
+        default="research/models/eraser.pkl",
         dest="eraser_path",
         help="Path to load/save the LEACE eraser pickle"
     )
@@ -62,12 +62,7 @@ def main():
     num_langs = len(languages)
 
     # Prepare directories
-    os.makedirs(os.path.dirname(args.eraser_path), exist_ok=True)
     embedding_model = SentenceTransformer(args.embedding_model)
-    results_dir = os.path.join(
-        os.path.dirname(args.eraser_path), "../outputs/embedding_plots"
-    )
-    os.makedirs(results_dir, exist_ok=True)
 
     # Train logistic on dev before erasure
     X_dev, Y_dev = load_embeddings(languages, embedding_model, "dev")
@@ -123,10 +118,8 @@ def main():
     plt.xticks(rotation=45, ha="right")
     plt.tight_layout()
 
-    out_path = os.path.join(results_dir, "leace.png")
-    plt.savefig(out_path)
-    print(f"Saved plot to {out_path}")
-
+    os.makedirs("outputs/graphs/overall_plots", exist_ok=True)
+    plt.savefig("outputs/graphs/overall_plots/leace.png")
 
 if __name__ == "__main__":
     main()

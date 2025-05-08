@@ -1,11 +1,12 @@
 import json
 import torch
+import argparse
+import os
 from itertools import product
 from huggingface_hub import login
 from transformers import pipeline, logging
 from datasets import Dataset, concatenate_datasets
 from tqdm import tqdm
-import argparse
 
 def run(
     model_id: str,
@@ -44,18 +45,15 @@ def run(
     # Prepare dataset from prompt combinations
     data = [
         {
-            "language": language,
+            "language": lang,
             "prompt_type": prompt_type,
             "attribute": attribute,
-            "message": prompts[language][prompt_type][attribute]
+            "message": message,
         }
-        for language, prompt_type, attribute in product(
-            prompts.keys(),
-            prompts["en"].keys(),
-            prompts["en"]["explicit"].keys()
-        )
+        for lang, ptypes in prompts.items()
+        for prompt_type, attrs in ptypes.items()
+        for attribute, message in attrs.items()
     ]
-
     dataset = Dataset.from_list(data)
     print("Dataset loaded")
 
@@ -83,6 +81,7 @@ def run(
     final_results_dict = final_results.to_dict()
 
     # Save output
+    os.makedirs("outputs/jsons/", exist_ok=True)
     output_path = f"outputs/jsons/{model_id.split('/')[-1]}_output.json"
     with open(output_path, "w") as json_file:
         json.dump(final_results_dict, json_file, indent=4)
